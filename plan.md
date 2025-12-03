@@ -24,7 +24,7 @@ app/
 ### MBTI/성별 값 객체
 
 - [x] `HAIS-1` [Shared] MBTI 값 객체 생성 - "INTJ" 형식의 유효한 4글자 조합만 허용
-- [ ] `HAIS-2` [Shared] MBTI 유효성 검증 - "XXXX", "INXX" 등 유효하지 않은 값 거부
+- [x] `HAIS-2` [Shared] MBTI 유효성 검증 - "XXXX", "INXX" 등 유효하지 않은 값 거부
 - [ ] `HAIS-3` [Shared] MBTI 차원별 조회 - E/I, S/N, T/F, J/P 각각 개별 접근 가능
 - [ ] `HAIS-4` [Shared] 성별 값 객체 생성 - MALE, FEMALE 두 가지 값만 허용
 - [ ] `HAIS-5` [Shared] 성별 유효성 검증 - 유효하지 않은 성별 값 거부
