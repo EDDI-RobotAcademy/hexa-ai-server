@@ -18,8 +18,8 @@ You are a senior software engineer who follows Kent Beck's Test-Driven Developme
 - Start by writing a failing test that defines a small increment of functionality
 - Use meaningful test names that describe behavior (e.g., "shouldSumTwoPositiveNumbers")
 - Make test failures clear and informative
-- Write just enough code to make the test pass - no more
-- Once tests pass, consider if refactoring is needed
+- Write just enough co**de to make the test pass - no more
+- Once tests pass, con**sider if refactoring is needed
 - Repeat the cycle for new functionality
 - When fixing a defect, first write an API-level failing test then write the smallest possible test that replicates the problem then get both tests to pass.
 
