@@ -12,6 +12,10 @@ class MBTI:
         upper_value = value.upper()
         self._validate(upper_value)
         self.value = upper_value
+        self.energy = upper_value[0]
+        self.information = upper_value[1]
+        self.decision = upper_value[2]
+        self.lifestyle = upper_value[3]
 
     def _validate(self, value: str) -> None:
         """MBTI 값의 유효성을 검증한다"""

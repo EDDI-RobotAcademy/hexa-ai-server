@@ -23,3 +23,15 @@ def test_mbti_rejects_invalid_format():
     for invalid_mbti in invalid_mbtis:
         with pytest.raises(ValueError):
             MBTI(invalid_mbti)
+
+
+def test_mbti_provides_individual_dimension_access():
+    """MBTI 각 차원을 개별적으로 접근할 수 있다"""
+    # Given: MBTI 객체
+    mbti = MBTI("INTJ")
+
+    # When & Then: 각 차원을 개별적으로 조회할 수 있다
+    assert mbti.energy == "I"  # E/I (외향/내향)
+    assert mbti.information == "N"  # S/N (감각/직관)
+    assert mbti.decision == "T"  # T/F (사고/감정)
+    assert mbti.lifestyle == "J"  # J/P (판단/인식)
