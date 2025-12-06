@@ -56,7 +56,7 @@ Adapter (Web) → Application (UseCase) → Domain ← Infrastructure (DB, API)
 
 > **중요**: 모든 AI 세션은 로그인 필수. 대화 내용은 user_id와 연결하여 저장.
 
-- [ ] `HAIS-6` [Auth] User 도메인 - id, email (핵심 유저 정보)
+- [x] `HAIS-6` [Auth] User 도메인 - id, email (핵심 유저 정보)
 - [ ] `HAIS-7` [Auth] UserIdentity 도메인 - user_id, provider, provider_user_id (OAuth 연결, 여러 provider 지원)
 - [ ] `HAIS-8` [Auth] UserInfo 도메인 - user_id, mbti, gender (프로필 정보)
 - [ ] `HAIS-9` [Auth] Repository Port - UserRepositoryPort, UserIdentityRepositoryPort, UserInfoRepositoryPort 인터페이스 + In-Memory 구현
