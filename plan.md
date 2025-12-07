@@ -90,7 +90,7 @@ Adapter (Web) → Application (UseCase) → Domain ← Infrastructure (DB, API)
   - SessionRepositoryPort + In-Memory/Redis 구현
   - 세션 생성/조회/삭제 (TTL 지원)
 
-- [ ] `HAIS-11` [Auth] OAuth 콜백 처리
+- [x] `HAIS-11` [Auth] OAuth 콜백 처리
   - Google/Kakao OAuth 로그인 (이메일 로그인 없음)
   - 신규 회원 자동 생성
   - Redis 세션 발급
