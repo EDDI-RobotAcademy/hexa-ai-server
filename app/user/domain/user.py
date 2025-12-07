@@ -1,10 +1,22 @@
+from app.shared.domain.gender import Gender
+from app.shared.domain.mbti import MBTI
+
+
 class User:
     """User 도메인 엔티티"""
 
-    def __init__(self, id: str, email: str):
+    def __init__(
+        self,
+        id: str,
+        email: str,
+        mbti: MBTI | None = None,
+        gender: Gender | None = None,
+    ):
         self._validate(id, email)
         self.id = id
         self.email = email
+        self.mbti = mbti
+        self.gender = gender
 
     def _validate(self, id: str, email: str) -> None:
         """User 값의 유효성을 검증한다"""

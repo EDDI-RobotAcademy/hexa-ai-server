@@ -6,6 +6,12 @@
 
 ```
 app/
+├── user/                       # 사용자 도메인
+│   └── domain/                # User 엔티티 (id, email, mbti, gender)
+│
+├── auth/                       # 인증 도메인 (OAuth 전용)
+│   └── domain/                # OAuthIdentity (provider, provider_user_id, email)
+│
 ├── consult/                    # 상담 도메인
 │   ├── domain/                 # 비즈니스 로직 (엔티티, 값 객체)
 │   ├── application/            # 유스케이스 레이어
@@ -18,13 +24,15 @@ app/
 │       └── input/web/         # 웹 컨트롤러 (FastAPI)
 │           ├── request/       # 요청 DTO
 │           └── response/      # 응답 DTO
+│
 ├── converter/                  # 변환기 도메인 (동일 구조)
 │   ├── domain/
 │   ├── application/
 │   ├── infrastructure/
 │   └── adapter/
-└── shared/                     # 공통 모듈 (MBTI, Gender, UserProfile)
-    └── domain/                # 공통 값 객체
+│
+└── shared/                     # 공통 값 객체
+    └── domain/                # MBTI, Gender VO
 ```
 
 **핵사고날 의존성 흐름**:
@@ -52,15 +60,36 @@ Adapter (Web) → Application (UseCase) → Domain ← Infrastructure (DB, API)
 - [x] `HAIS-4` [Shared] Gender 값 객체 - MALE/FEMALE 생성 및 유효성 검증
 - [x] `HAIS-5` [Shared] UserProfile 값 객체 - Gender + MBTI 조합, 필수값 검증
 
+#### User Domain (사용자 정보)
+
+- [x] `HAIS-6` [User] User 도메인 - id, email (핵심 유저 정보)
+
 #### Auth Domain (인증 시스템 🔐)
 
 > **중요**: 모든 AI 세션은 로그인 필수. 대화 내용은 user_id와 연결하여 저장.
+> Auth 도메인은 순수 OAuth 인증만 담당, User 도메인과 분리됨.
 
-- [x] `HAIS-6` [Auth] User 도메인 - id, email (핵심 유저 정보)
-- [x] `HAIS-7` [Auth] UserIdentity 도메인 - user_id, provider, provider_user_id (OAuth 연결, 여러 provider 지원)
-- [ ] `HAIS-8` [Auth] UserInfo 도메인 - user_id, mbti, gender (프로필 정보)
-- [ ] `HAIS-9` [Auth] Repository Port - UserRepositoryPort, UserIdentityRepositoryPort, UserInfoRepositoryPort 인터페이스 + In-Memory 구현
-- [ ] `HAIS-10` [Auth] OAuth 콜백 처리 + JWT 발급 - Google/Kakao OAuth 로그인, 신규 회원 자동 생성
+- [x] `HAIS-7` [Auth] UserIdentity 도메인 - OAuth 연결 (여러 provider 지원)
+
+#### Refactoring (도메인 구조 개선 - YAGNI 적용)
+
+- [x] `HAIS-8` [Refactor] User 도메인 이동 및 확장
+  - auth/domain/user.py → user/domain/user.py 이동
+  - mbti: Optional[MBTI], gender: Optional[Gender] 추가
+  - UserProfile 삭제 (YAGNI - 불필요한 추상화 제거)
+
+- [x] `HAIS-9` [Refactor] OAuthIdentity 분리
+  - UserIdentity → OAuthIdentity 리네임
+  - user_id 제거 (auth는 user를 모름)
+  - email 추가 (OAuth provider에서 받은 이메일)
+  - 순수 OAuth 정보만 담당
+
+- [ ] `HAIS-10` [Auth] Repository Port + OAuth 콜백 처리
+  - OAuthIdentityRepositoryPort, UserRepositoryPort 인터페이스
+  - In-Memory 구현
+  - Google/Kakao OAuth 로그인, 신규 회원 자동 생성
+  - JWT 발급
+
 - [ ] `HAIS-11` [Auth] 인증 미들웨어 - JWT 검증, 요청에 user_id 주입
 
 ### Phase 1: 병렬 개발 - Consult + Converter (동시 진행 가능 🔥)

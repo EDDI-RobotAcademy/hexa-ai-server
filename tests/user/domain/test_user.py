@@ -1,5 +1,7 @@
 import pytest
-from app.auth.domain.user import User
+from app.user.domain.user import User
+from app.shared.domain.mbti import MBTI
+from app.shared.domain.gender import Gender
 
 
 def test_user_creates_with_id_and_email():
@@ -36,3 +38,27 @@ def test_user_rejects_empty_email():
     # When & Then: User 객체 생성 시 ValueError가 발생한다
     with pytest.raises(ValueError):
         User(id=user_id, email=email)
+
+
+def test_user_creates_with_optional_mbti_and_gender():
+    """mbti와 gender 없이 User 객체를 생성할 수 있다"""
+    # Given: mbti와 gender 없이
+    user = User(id="user-123", email="test@example.com")
+
+    # Then: mbti와 gender는 None이다
+    assert user.mbti is None
+    assert user.gender is None
+
+
+def test_user_creates_with_mbti_and_gender():
+    """mbti와 gender를 포함하여 User 객체를 생성할 수 있다"""
+    # Given: mbti와 gender
+    mbti = MBTI("INTJ")
+    gender = Gender("MALE")
+
+    # When: User 객체를 생성하면
+    user = User(id="user-123", email="test@example.com", mbti=mbti, gender=gender)
+
+    # Then: mbti와 gender 값을 조회할 수 있다
+    assert user.mbti.value == "INTJ"
+    assert user.gender.value == "MALE"
