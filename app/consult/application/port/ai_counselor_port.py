@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from app.shared.vo.mbti import MBTI
 from app.shared.vo.gender import Gender
+from app.consult.domain.consult_session import ConsultSession
 
 
 class AICounselorPort(ABC):
@@ -18,5 +19,17 @@ class AICounselorPort(ABC):
 
         Returns:
             AI가 생성한 인사말
+        """
+        pass
+    def generate_response(self, session: ConsultSession, user_message: str) -> str:
+        """
+        사용자 메시지에 대한 AI 응답을 생성한다.
+
+        Args:
+            session: 상담 세션 (MBTI, Gender, 대화 히스토리 포함)
+            user_message: 사용자가 보낸 메시지
+
+        Returns:
+            AI 응답 메시지
         """
         pass

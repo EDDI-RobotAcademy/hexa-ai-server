@@ -11,6 +11,7 @@ from tests.user.fixtures.fake_user_repository import FakeUserRepository
 from tests.auth.fixtures.fake_session_repository import FakeSessionRepository
 from tests.consult.fixtures.fake_consult_repository import FakeConsultRepository
 from tests.consult.fixtures.fake_ai_counselor import FakeAICounselor
+from app.consult.domain.consult_session import ConsultSession
 
 
 @pytest.fixture
@@ -43,6 +44,8 @@ def consult_repo():
 def ai_counselor():
     """테스트용 AI Counselor"""
     return FakeAICounselor()
+    """테스트용 AI 상담사"""
+    return FakeAICounselor(response="AI 응답입니다")
 
 
 @pytest.fixture
@@ -130,3 +133,123 @@ def test_start_consult_without_user_profile_returns_400(client, user_repo, sessi
 
     # Then: 400 Bad Request를 반환한다
     assert response.status_code == 400
+
+
+def test_send_message_returns_ai_response(client, user_repo, session_repo, consult_repo):
+    """메시지 전송 시 AI 응답을 반환한다"""
+    # Given: 로그인한 사용자
+    user = User(
+        id="user-123",
+        email="test@example.com",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    user_repo.save(user)
+
+    # Given: 유효한 인증 세션
+    auth_session = Session(session_id="valid-session-123", user_id="user-123")
+    session_repo.save(auth_session)
+
+    # Given: 상담 세션
+    consult_session = ConsultSession(
+        id="consult-session-123",
+        user_id="user-123",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    consult_repo.save(consult_session)
+
+    # When: 메시지 전송 API를 호출하면
+    response = client.post(
+        "/consult/consult-session-123/message",
+        headers={"Authorization": "Bearer valid-session-123"},
+        json={"content": "안녕하세요"}
+    )
+
+    # Then: 200 OK와 AI 응답을 반환한다
+    assert response.status_code == 200
+    data = response.json()
+    assert "response" in data
+    assert data["response"] == "AI 응답입니다"
+
+
+def test_send_message_without_auth_returns_401(client, consult_repo):
+    """인증 없이 메시지를 보내면 401을 반환한다"""
+    # Given: 상담 세션
+    consult_session = ConsultSession(
+        id="consult-session-123",
+        user_id="user-123",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    consult_repo.save(consult_session)
+
+    # When: Authorization 헤더 없이 API를 호출하면
+    response = client.post(
+        "/consult/consult-session-123/message",
+        json={"content": "안녕하세요"}
+    )
+
+    # Then: 401 Unauthorized를 반환한다
+    assert response.status_code == 401
+
+
+def test_send_message_to_others_session_returns_403(client, user_repo, session_repo, consult_repo):
+    """다른 사용자의 세션에 메시지를 보내면 403을 반환한다"""
+    # Given: 로그인한 사용자
+    user = User(
+        id="user-123",
+        email="test@example.com",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    user_repo.save(user)
+
+    # Given: 유효한 인증 세션
+    auth_session = Session(session_id="valid-session-123", user_id="user-123")
+    session_repo.save(auth_session)
+
+    # Given: 다른 사용자의 상담 세션
+    consult_session = ConsultSession(
+        id="consult-session-123",
+        user_id="other-user",
+        mbti=MBTI("ENFP"),
+        gender=Gender("FEMALE")
+    )
+    consult_repo.save(consult_session)
+
+    # When: 다른 사용자의 세션에 메시지를 보내면
+    response = client.post(
+        "/consult/consult-session-123/message",
+        headers={"Authorization": "Bearer valid-session-123"},
+        json={"content": "안녕하세요"}
+    )
+
+    # Then: 403 Forbidden을 반환한다
+    assert response.status_code == 403
+
+
+def test_send_message_to_nonexistent_session_returns_404(client, user_repo, session_repo):
+    """존재하지 않는 세션에 메시지를 보내면 404를 반환한다"""
+    # Given: 로그인한 사용자
+    user = User(
+        id="user-123",
+        email="test@example.com",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    user_repo.save(user)
+
+    # Given: 유효한 인증 세션
+    auth_session = Session(session_id="valid-session-123", user_id="user-123")
+    session_repo.save(auth_session)
+
+    # When: 존재하지 않는 세션에 메시지를 보내면
+    response = client.post(
+        "/consult/nonexistent-session/message",
+        headers={"Authorization": "Bearer valid-session-123"},
+        json={"content": "안녕하세요"}
+    )
+
+    # Then: 404 Not Found를 반환한다
+    assert response.status_code == 404

@@ -1,6 +1,7 @@
 from datetime import datetime
 from app.shared.vo.mbti import MBTI
 from app.shared.vo.gender import Gender
+from app.consult.domain.message import Message
 
 
 class ConsultSession:
@@ -20,6 +21,7 @@ class ConsultSession:
         self.mbti = mbti
         self.gender = gender
         self.created_at = created_at or datetime.now()
+        self._messages: list[Message] = []
 
     def _validate(self, id: str, user_id: str, mbti: MBTI | None, gender: Gender | None) -> None:
         """ConsultSession 값의 유효성을 검증한다"""
@@ -31,3 +33,11 @@ class ConsultSession:
             raise ValueError("ConsultSession mbti는 None일 수 없습니다")
         if gender is None:
             raise ValueError("ConsultSession gender는 None일 수 없습니다")
+
+    def add_message(self, message: Message) -> None:
+        """세션에 메시지를 추가한다"""
+        self._messages.append(message)
+
+    def get_messages(self) -> list[Message]:
+        """세션의 모든 메시지를 반환한다"""
+        return list(self._messages)
