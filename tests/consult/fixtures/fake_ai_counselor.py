@@ -1,5 +1,6 @@
 from app.consult.application.port.ai_counselor_port import AICounselorPort
 from app.consult.domain.consult_session import ConsultSession
+from app.consult.domain.analysis import Analysis
 from app.shared.vo.mbti import MBTI
 from app.shared.vo.gender import Gender
 
@@ -9,6 +10,12 @@ class FakeAICounselor(AICounselorPort):
 
     def __init__(self, response: str = "AI 응답입니다"):
         self._response = response
+        self._analysis = Analysis(
+            situation="테스트 상황 분석",
+            traits="테스트 특성 분석",
+            solutions="테스트 해결책",
+            cautions="테스트 주의사항"
+        )
 
     def generate_greeting(self, mbti: MBTI, gender: Gender) -> str:
         """간단한 고정 인사말을 반환한다"""
@@ -17,6 +24,14 @@ class FakeAICounselor(AICounselorPort):
     def generate_response(self, session: ConsultSession, user_message: str) -> str:
         return self._response
 
+    def generate_analysis(self, session: ConsultSession) -> Analysis:
+        """테스트용 고정 분석 결과를 반환한다"""
+        return self._analysis
+
     def set_response(self, response: str) -> None:
         """테스트용: 응답 설정"""
         self._response = response
+
+    def set_analysis(self, analysis: Analysis) -> None:
+        """테스트용: 분석 결과 설정"""
+        self._analysis = analysis

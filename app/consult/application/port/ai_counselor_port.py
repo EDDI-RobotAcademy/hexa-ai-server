@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from app.shared.vo.mbti import MBTI
 from app.shared.vo.gender import Gender
 from app.consult.domain.consult_session import ConsultSession
+from app.consult.domain.analysis import Analysis
 
 
 class AICounselorPort(ABC):
@@ -33,5 +34,18 @@ class AICounselorPort(ABC):
 
         Returns:
             AI 응답 메시지
+        """
+        pass
+
+    @abstractmethod
+    def generate_analysis(self, session: ConsultSession) -> Analysis:
+        """
+        상담 세션을 기반으로 MBTI 관계 분석을 생성한다.
+
+        Args:
+            session: 상담 세션 (MBTI, Gender, 대화 히스토리 포함)
+
+        Returns:
+            Analysis: 4개 섹션(situation, traits, solutions, cautions)을 포함한 분석 결과
         """
         pass

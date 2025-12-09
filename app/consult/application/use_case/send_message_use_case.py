@@ -53,7 +53,19 @@ class SendMessageUseCase:
         # 7. 세션 저장 (업데이트)
         self._repository.save(session)
 
-        # 8. 남은 턴 수 계산
+        # 8. 남은 턴 수 및 완료 여부 계산
+        is_completed = session.is_completed()
         remaining_turns = max(0, 5 - session.get_user_turn_count())
 
-        return {"response": ai_response, "remaining_turns": remaining_turns}
+        result = {
+            "response": ai_response,
+            "remaining_turns": remaining_turns,
+            "is_completed": is_completed,
+        }
+
+        # 9. 5턴 완료 시 분석 자동 생성
+        if is_completed:
+            analysis = self._ai_counselor.generate_analysis(session)
+            result["analysis"] = analysis.to_dict()
+
+        return result

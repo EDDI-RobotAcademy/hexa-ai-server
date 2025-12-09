@@ -184,7 +184,7 @@ client_id = settings.GOOGLE_CLIENT_ID
   - **API 확장**: 응답에 `remaining_turns` 필드 추가
   - **✅ 인수 조건**: 턴 카운트 정확, 5턴 초과 시 400 에러
 
-- [ ] `HAIS-16` [Consult] 5턴 완료 시 자동 분석
+- [x] `HAIS-16` [Consult] 5턴 완료 시 자동 분석
   - **📖 유저 스토리**: "사용자로서, 5턴 완료 후 종료 안내와 함께 자동으로 분석 결과를 받고 싶다"
   - **Domain**: `Analysis` (situation, traits, solutions, cautions)
   - **Port 확장**: `AICounselorPort.generate_analysis()`

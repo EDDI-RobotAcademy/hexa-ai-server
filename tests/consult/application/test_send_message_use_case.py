@@ -106,3 +106,61 @@ class TestSendMessageUseCase:
                 user_id="user-456",
                 content="추가 질문"
             )
+
+    def test_send_message_returns_analysis_on_5th_turn(self):
+        """5턴째 메시지 전송 시 분석 결과를 반환한다"""
+        from app.consult.domain.message import Message
+
+        # Given: 4턴 진행된 세션
+        for i in range(4):
+            self.session.add_message(Message(role="user", content=f"질문 {i+1}"))
+            self.session.add_message(Message(role="assistant", content=f"답변 {i+1}"))
+        self.repository.save(self.session)
+
+        # When: 5번째 메시지 전송
+        result = self.use_case.execute(
+            session_id="session-123",
+            user_id="user-456",
+            content="마지막 질문"
+        )
+
+        # Then: 분석 결과가 포함됨
+        assert "analysis" in result
+        assert result["analysis"]["situation"] == "테스트 상황 분석"
+        assert result["analysis"]["traits"] == "테스트 특성 분석"
+        assert result["analysis"]["solutions"] == "테스트 해결책"
+        assert result["analysis"]["cautions"] == "테스트 주의사항"
+
+    def test_send_message_returns_is_completed_true_on_5th_turn(self):
+        """5턴째 메시지 전송 시 is_completed가 true이다"""
+        from app.consult.domain.message import Message
+
+        # Given: 4턴 진행된 세션
+        for i in range(4):
+            self.session.add_message(Message(role="user", content=f"질문 {i+1}"))
+            self.session.add_message(Message(role="assistant", content=f"답변 {i+1}"))
+        self.repository.save(self.session)
+
+        # When: 5번째 메시지 전송
+        result = self.use_case.execute(
+            session_id="session-123",
+            user_id="user-456",
+            content="마지막 질문"
+        )
+
+        # Then: is_completed가 true
+        assert result["is_completed"] is True
+        assert result["remaining_turns"] == 0
+
+    def test_send_message_returns_is_completed_false_before_5th_turn(self):
+        """5턴 전에는 is_completed가 false이다"""
+        # When: 첫 번째 메시지 전송
+        result = self.use_case.execute(
+            session_id="session-123",
+            user_id="user-456",
+            content="첫 질문"
+        )
+
+        # Then: is_completed가 false
+        assert result["is_completed"] is False
+        assert "analysis" not in result

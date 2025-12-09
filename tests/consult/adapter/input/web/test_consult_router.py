@@ -330,3 +330,89 @@ def test_send_message_to_completed_session_returns_400(client, user_repo, sessio
     # Then: 400 Bad Request를 반환한다
     assert response.status_code == 400
     assert "상담이 완료되었습니다" in response.json()["detail"]
+
+
+def test_send_message_returns_analysis_on_5th_turn(client, user_repo, session_repo, consult_repo):
+    """5턴째 메시지 전송 시 분석 결과를 반환한다"""
+    from app.consult.domain.message import Message
+
+    # Given: 로그인한 사용자
+    user = User(
+        id="user-123",
+        email="test@example.com",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    user_repo.save(user)
+
+    # Given: 유효한 인증 세션
+    auth_session = Session(session_id="valid-session-123", user_id="user-123")
+    session_repo.save(auth_session)
+
+    # Given: 4턴 진행된 상담 세션
+    consult_session = ConsultSession(
+        id="consult-session-123",
+        user_id="user-123",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    for i in range(4):
+        consult_session.add_message(Message(role="user", content=f"질문 {i+1}"))
+        consult_session.add_message(Message(role="assistant", content=f"답변 {i+1}"))
+    consult_repo.save(consult_session)
+
+    # When: 5번째 메시지 전송
+    response = client.post(
+        "/consult/consult-session-123/message",
+        headers={"Authorization": "Bearer valid-session-123"},
+        json={"content": "마지막 질문"}
+    )
+
+    # Then: 200 OK와 분석 결과를 반환한다
+    assert response.status_code == 200
+    data = response.json()
+    assert data["is_completed"] is True
+    assert data["remaining_turns"] == 0
+    assert "analysis" in data
+    assert "situation" in data["analysis"]
+    assert "traits" in data["analysis"]
+    assert "solutions" in data["analysis"]
+    assert "cautions" in data["analysis"]
+
+
+def test_send_message_returns_is_completed_false_before_5th_turn(client, user_repo, session_repo, consult_repo):
+    """5턴 전에는 is_completed가 false이다"""
+    # Given: 로그인한 사용자
+    user = User(
+        id="user-123",
+        email="test@example.com",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    user_repo.save(user)
+
+    # Given: 유효한 인증 세션
+    auth_session = Session(session_id="valid-session-123", user_id="user-123")
+    session_repo.save(auth_session)
+
+    # Given: 새 상담 세션
+    consult_session = ConsultSession(
+        id="consult-session-123",
+        user_id="user-123",
+        mbti=MBTI("INTJ"),
+        gender=Gender("MALE")
+    )
+    consult_repo.save(consult_session)
+
+    # When: 첫 번째 메시지 전송
+    response = client.post(
+        "/consult/consult-session-123/message",
+        headers={"Authorization": "Bearer valid-session-123"},
+        json={"content": "첫 질문"}
+    )
+
+    # Then: is_completed가 false
+    assert response.status_code == 200
+    data = response.json()
+    assert data["is_completed"] is False
+    assert "analysis" not in data

@@ -15,3 +15,7 @@ class TestAICounselorPort:
     def test_ai_counselor_port_has_generate_response_method(self):
         """AICounselorPort는 generate_response 메서드를 가진다"""
         assert hasattr(AICounselorPort, "generate_response")
+
+    def test_ai_counselor_port_has_generate_analysis_method(self):
+        """AICounselorPort는 generate_analysis 메서드를 가진다"""
+        assert hasattr(AICounselorPort, "generate_analysis")
