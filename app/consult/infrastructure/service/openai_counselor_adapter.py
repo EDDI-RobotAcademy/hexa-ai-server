@@ -1,8 +1,10 @@
+import json
 from typing import Iterator
 from openai import OpenAI
 
 from app.consult.application.port.ai_counselor_port import AICounselorPort
 from app.consult.domain.consult_session import ConsultSession
+from app.consult.domain.analysis import Analysis
 from app.shared.vo.mbti import MBTI
 from app.shared.vo.gender import Gender
 
@@ -148,3 +150,61 @@ MBTI 특성 고려사항:
             })
 
         return messages
+
+    def generate_analysis(self, session: ConsultSession) -> Analysis:
+        """
+        상담 세션을 기반으로 MBTI 관계 분석을 생성한다.
+        """
+        prompt = self._build_analysis_prompt(session)
+
+        response = self._client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "당신은 10년 경력의 MBTI 전문 상담사입니다. 대화 내용을 분석하여 MBTI 기반 관계 조언을 제공합니다. 반드시 JSON 형식으로만 응답하세요."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=0.7,
+            max_tokens=1000,
+            response_format={"type": "json_object"}
+        )
+
+        result = json.loads(response.choices[0].message.content)
+
+        return Analysis(
+            situation=result["situation"],
+            traits=result["traits"],
+            solutions=result["solutions"],
+            cautions=result["cautions"],
+        )
+
+    def _build_analysis_prompt(self, session: ConsultSession) -> str:
+        """분석을 위한 프롬프트 생성"""
+        conversation = "\n".join([
+            f"{'사용자' if msg.role == 'user' else 'AI'}: {msg.content}"
+            for msg in session.get_messages()
+        ])
+
+        return f"""다음은 MBTI 관계 상담 대화입니다.
+
+사용자 정보:
+- MBTI: {session.mbti.value}
+- 성별: {session.gender.value}
+
+대화 내용:
+{conversation}
+
+위 대화를 분석하여 다음 4가지 섹션으로 정리해주세요.
+
+반드시 아래 JSON 형식으로만 응답하세요:
+{{
+    "situation": "상황 정리 (2-3문장으로 사용자의 관계 고민을 요약)",
+    "traits": "MBTI 특성 분석 (사용자의 MBTI 특성이 이 상황에 어떻게 영향을 미치는지 설명)",
+    "solutions": "관계 개선 솔루션 (구체적인 행동 조언 3가지를 번호 매겨서)",
+    "cautions": "주의사항 (이 MBTI 유형이 조심해야 할 점 2가지)"
+}}"""
