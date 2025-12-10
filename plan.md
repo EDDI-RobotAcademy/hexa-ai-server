@@ -195,7 +195,7 @@ client_id = settings.GOOGLE_CLIENT_ID
 
 #### Team Converter: 변환 기능 (Thin Slice 방식 🔄)
 
-- [x] `HAIS-17` [Converter] 메시지 변환 기본 (**Consult와 병렬 가능**)
+- [x] `HAIS-17` [Converter] 메시지 변환 기본 (**Consult와 병렬 가능**) ✅
   - **📖 유저 스토리**: "사용자로서, 내 메시지를 다른 톤으로 변환하고 싶다"
   - **Domain**: `ToneMessage` (tone, content, explanation)
   - **Port**: `MessageConverterPort` 인터페이스 정의
