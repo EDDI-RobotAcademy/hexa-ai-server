@@ -101,6 +101,7 @@ async def auth_status(request: Request, session_id: str | None = Cookie(None)):
     }
 
 
+@google_oauth_router.post("/logout")
 async def logout(session_id: str | None = Cookie(None)):
     """로그아웃 - 세션 삭제"""
     if session_id:
